@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스토어 딥링크 테스트</title>
+<style>
+  body { font-family: -apple-system, "Noto Sans KR", sans-serif; margin: 0; padding: 20px; line-height: 1.5; color: #222; background: #fafafa; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.desc { margin: 0 0 20px; color: #666; font-size: 14px; }
+  h2 { font-size: 15px; margin: 24px 0 8px; }
+  a.btn { display: block; padding: 14px; margin-bottom: 8px; border-radius: 10px; background: #fee500; color: #222; text-decoration: none; font-weight: 600; text-align: center; }
+  a.btn.alt { background: #fff; border: 1px solid #ccc; font-weight: 400; }
+  code { display: block; font-size: 11px; color: #888; margin: -4px 0 12px; word-break: break-all; }
+  #ua { font-size: 12px; background: #eee; padding: 10px; border-radius: 8px; word-break: break-all; }
+</style>
+</head>
+<body>
+  <h1>스토어 딥링크 테스트</h1>
+  <p class="desc">카카오톡(com.kakao.talk) 스토어 페이지가 열리는지 확인합니다. 기기에 맞는 스킴만 동작하는 것이 정상입니다.</p>
+
+  <h2>1. 커스텀 스킴</h2>
+  <a class="btn" href="market://details?id=com.kakao.talk">Android: market://</a>
+  <code>market://details?id=com.kakao.talk</code>
+  <a class="btn" href="itms-apps://apps.apple.com/app/id362057947">iOS: itms-apps://</a>
+  <code>itms-apps://apps.apple.com/app/id362057947</code>
+
+  <h2>2. Android intent 스킴 (크롬용)</h2>
+  <a class="btn alt" href="intent://details?id=com.kakao.talk#Intent;scheme=market;package=com.android.vending;end">Android: intent://</a>
+
+  <h2>3. https 대체 링크</h2>
+  <a class="btn alt" href="https://play.google.com/store/apps/details?id=com.kakao.talk">Android: Play 스토어 (https)</a>
+  <a class="btn alt" href="https://apps.apple.com/app/id362057947">iOS: App Store (https)</a>
+
+  <h2>4. OS 자동 분기</h2>
+  <a class="btn alt" href="#" id="auto">내 기기에 맞는 스토어 열기</a>
+
+  <h2>현재 환경</h2>
+  <div id="ua"></div>
+
+<script>
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isKakao = /KAKAOTALK/i.test(ua);
+
+  document.getElementById('ua').textContent =
+    'OS: ' + (isAndroid ? 'Android' : isIOS ? 'iOS' : '기타(PC 등)') +
+    ' / 카카오톡 인앱: ' + (isKakao ? '예' : '아니오') +
+    '\n' + ua;
+  document.getElementById('ua').style.whiteSpace = 'pre-wrap';
+
+  document.getElementById('auto').addEventListener('click', function (e) {
+    e.preventDefault();
+    var scheme, web;
+    if (isAndroid) {
+      scheme = 'market://details?id=com.kakao.talk';
+      web = 'https://play.google.com/store/apps/details?id=com.kakao.talk';
+    } else if (isIOS) {
+      scheme = 'itms-apps://apps.apple.com/app/id362057947';
+      web = 'https://apps.apple.com/app/id362057947';
+    } else {
+      location.href = 'https://play.google.com/store/apps/details?id=com.kakao.talk';
+      return;
+    }
+    var t = setTimeout(function () { location.href = web; }, 1500);
+    window.addEventListener('pagehide', function () { clearTimeout(t); });
+    location.href = scheme;
+  });
+</script>
+</body>
+</html>
